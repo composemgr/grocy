@@ -1,0 +1,36 @@
+# nginx proxy address - http://172.17.0.1:9283
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "5m"
+    max-file: "1"
+
+services:
+  grocy:
+    image: grocy/grocy:latest
+    container_name: grocy-app
+    restart: unless-stopped
+    logging: *default-logging
+    networks:
+      - grocy
+    ports:
+      - "9283:9283"
+    environment:
+      TZ: ${TZ:-America/New_York}
+      PUID: ${SERVICE_USER:-1000}
+      PGID: ${SERVICE_GROUP:-1000}
+    volumes:
+      - ./rootfs/config/grocy:/config
+      - ./rootfs/data/grocy:/data
+      - ./rootfs/data/media:/media
+      - ./rootfs/data/downloads:/downloads
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9283"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  grocy:
+    external: false
