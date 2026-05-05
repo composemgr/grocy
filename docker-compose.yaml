@@ -21,10 +21,10 @@ services:
       PUID: ${SERVICE_USER:-1000}
       PGID: ${SERVICE_GROUP:-1000}
     volumes:
-      - ./rootfs/config/grocy:/config
-      - ./rootfs/data/grocy:/data
-      - ./rootfs/data/media:/media
-      - ./rootfs/data/downloads:/downloads
+      - ./volumes/config/grocy:/config
+      - ./volumes/data/grocy:/data
+      - ./volumes/data/media:/media
+      - ./volumes/data/downloads:/downloads
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9283"]
       interval: 30s
