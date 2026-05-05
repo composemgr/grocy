@@ -47,10 +47,10 @@ See `docker-compose.yaml` for complete list of configurable options.
 
 ## 📂 Volumes
 
-- `./rootfs/config/grocy` - Data storage
-- `./rootfs/data/grocy` - Data storage
-- `./rootfs/data/media` - Data storage
-- `./rootfs/data/downloads` - Data storage
+- `./volumes/config/grocy` - Data storage
+- `./volumes/data/grocy` - Data storage
+- `./volumes/data/media` - Data storage
+- `./volumes/data/downloads` - Data storage
 
 ## 🔍 Logging
 
