@@ -16,6 +16,8 @@ services:
     logging: *default-logging
     networks:
       - grocy
+      - proxy
+      - cloudflare
     ports:
       - "172.17.0.1:9283:80"
     environment:
@@ -24,10 +26,32 @@ services:
       PGID: ${SERVICE_GROUP:-1000}
       GROCY_CURRENCY: ${GROCY_CURRENCY:-USD}
       GROCY_CULTURE: ${GROCY_CULTURE:-en}
+      CONTAINER_NAME: grocy-app
+      HOSTNAME: ${BASE_HOST_NAME:-$HOSTNAME}
     volumes:
       - ./volumes/config/grocy:/config
+    labels:
+      - 'traefik.enable=true'
+      - 'cloudflare.enable=true'
+      - 'traefik.docker.network=proxy'
+      - 'cloudflare.service=http://grocy-app:80'
+      - 'cloudflare.hostname=grocy.${CLOUDFLARE_ZONE_NAME:-}'
+      - 'traefik.http.routers.grocy-app.entrypoints=http'
+      - 'traefik.http.routers.grocy-app-secure.tls=true'
+      - 'traefik.http.routers.grocy-app.rule=Host($(${BASE_HOST_NAME:-$HOSTNAME}))'
+      - 'traefik.http.middlewares.grocy-app-https-redirect.redirectscheme.scheme=https'
+      - 'traefik.http.routers.grocy-app.middlewares=grocy-app-https-redirect'
+      - 'traefik.http.routers.grocy-app-secure.entrypoints=https'
+      - 'traefik.http.routers.grocy-app-secure.rule=Host($(${BASE_HOST_NAME:-$HOSTNAME}))'
+      - 'traefik.http.routers.grocy-app-secure.tls.certresolver=cloudflare'
+      - 'traefik.http.routers.grocy-app-secure.service=grocy-app'
+      - 'traefik.http.services.grocy-app.loadbalancer.server.port=80'
 
 networks:
   grocy:
     name: grocy
     external: false
+  proxy:
+    external: true
+  cloudflare:
+    external: true
