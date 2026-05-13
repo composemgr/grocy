@@ -1,5 +1,6 @@
 # nginx proxy address - http://172.17.0.1:9283
 
+name: grocy
 x-logging: &default-logging
   driver: json-file
   options:
@@ -7,30 +8,26 @@ x-logging: &default-logging
     max-file: "1"
 
 services:
-  grocy:
-    image: grocy/grocy:latest
+  app:
+    image: lscr.io/linuxserver/grocy:latest
+    pull_policy: always
     container_name: grocy-app
-    restart: unless-stopped
+    restart: always
     logging: *default-logging
     networks:
       - grocy
     ports:
-      - "9283:9283"
+      - "172.17.0.1:9283:80"
     environment:
       TZ: ${TZ:-America/New_York}
       PUID: ${SERVICE_USER:-1000}
       PGID: ${SERVICE_GROUP:-1000}
+      GROCY_CURRENCY: ${GROCY_CURRENCY:-USD}
+      GROCY_CULTURE: ${GROCY_CULTURE:-en}
     volumes:
       - ./volumes/config/grocy:/config
-      - ./volumes/data/grocy:/data
-      - ./volumes/data/media:/media
-      - ./volumes/data/downloads:/downloads
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9283"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
 networks:
   grocy:
+    name: grocy
     external: false
