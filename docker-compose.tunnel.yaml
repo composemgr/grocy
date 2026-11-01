@@ -1,0 +1,40 @@
+name: grocy
+x-logging: &default-logging
+  options:
+    max-size: '5m'
+    max-file: '1'
+  driver: json-file
+
+services:
+  app:
+    image: lscr.io/linuxserver/grocy:latest
+    container_name: grocy-app
+    domainname: ${BASE_DOMAIN_NAME:-example.com}
+    hostname: ${BASE_HOST_NAME:-$HOSTNAME}
+    restart: always
+    pull_policy: always
+    logging: *default-logging
+    environment:
+      TZ: ${TZ:-America/New_York}
+      CONTAINER_NAME: grocy-app
+      HOSTNAME: ${BASE_HOST_NAME:-$HOSTNAME}
+      PUID: ${SERVICE_USER:-1000}
+      PGID: ${SERVICE_GROUP:-1000}
+      GROCY_CURRENCY: ${GROCY_CURRENCY:-USD}
+      GROCY_CULTURE: ${GROCY_CULTURE:-en}
+    volumes:
+      - './volumes/config/grocy:/config:z'
+    labels:
+      - 'cloudflare.enable=true'
+      - 'cloudflare.service=http://grocy-app:80'
+      - 'cloudflare.hostname=${BASE_HOST_NAME:-$HOSTNAME}'
+    networks:
+      - grocy
+      - cloudflare
+
+networks:
+  grocy:
+    name: grocy
+    external: false
+  cloudflare:
+    external: true
